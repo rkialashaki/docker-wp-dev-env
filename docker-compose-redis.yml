@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+   db:
+     image: mysql:5.7
+     volumes:
+       - db_data:/var/lib/mysql
+     ports:
+       - "3306:3306"
+     restart: always
+     environment:
+       MYSQL_ROOT_PASSWORD: password1
+       MYSQL_DATABASE: wp_cli_test
+       MYSQL_USER: wp_cli_test
+       MYSQL_PASSWORD: password1
+
+   redis:
+    image: redis:latest
+    wolumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: always
+
+   wordpress:
+     depends_on:
+       - db
+       - redis
+     image: wp-dev-env:latest
+     volumes:
+       - ./resources:/home/wp/resources
+       - ./wp_data:/home/wp/wordpress
+     ports:
+       - "8080:80"
+       - "8000:8000"
+     restart: on-failure
+     environment:
+       WORDPRESS_DB_HOST: db:3306
+       WORDPRESS_DB_USER: wp_cli_test
+       WORDPRESS_DB_PASSWORD: password1
+     stdin_open: true
+     tty: true
+     entrypoint: /bin/bash
+volumes:
+    db_data:
+    redis_data:
